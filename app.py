@@ -4,33 +4,55 @@ import joblib
 import os
 import sys
 import plotly.express as px
+import nltk
+from pathlib import Path
 
-# Add src to path for imports
-sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+# --- Constants & Path Handling ---
+# Use Path for robust path handling in cloud environments
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / "data"
+SRC_DIR = BASE_DIR / "src"
+
+# Add src to sys.path for internal imports
+if str(SRC_DIR) not in sys.path:
+    sys.path.append(str(SRC_DIR))
+
+# --- Safe NLTK Setup ---
+@st.cache_resource
+def setup_nltk():
+    """Ensure NLTK resources are available without repeated downloads."""
+    try:
+        nltk.download('stopwords', quiet=True)
+    except Exception as e:
+        st.error(f"Error downloading NLTK data: {e}")
+
+setup_nltk()
 
 from preprocess import clean_text
 from model import predict_single
 
-# Page Configuration
+# --- Model Loading ---
+@st.cache_resource
+def load_assets():
+    """Load model and vectorizer with caching to prevent re-loading on every run."""
+    model_path = DATA_DIR / "model.pkl"
+    vec_path = DATA_DIR / "vectorizer.pkl"
+    
+    if not model_path.exists() or not vec_path.exists():
+        raise FileNotFoundError(f"Missing model files at {DATA_DIR}. Ensure they are committed to the repository.")
+        
+    model = joblib.load(model_path)
+    vectorizer = joblib.load(vec_path)
+    return model, vectorizer
+
+# --- Page Configuration ---
 st.set_page_config(
     page_title="AI Fake News Detector",
     page_icon="🕵️",
     layout="centered"
 )
 
-# Constants
-DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
-MODEL_FILE = os.path.join(DATA_DIR, 'model.pkl')
-VEC_FILE = os.path.join(DATA_DIR, 'vectorizer.pkl')
-
-# Cache model loading
-@st.cache_resource
-def load_assets():
-    model = joblib.load(MODEL_FILE)
-    vectorizer = joblib.load(VEC_FILE)
-    return model, vectorizer
-
-# Sidebar
+# --- UI Components ---
 st.sidebar.title("Model Details")
 st.sidebar.info("""
 **Architecture:** Logistic Regression
@@ -43,13 +65,11 @@ st.sidebar.markdown("### Model Provenance")
 st.sidebar.text("Training data: 400 articles")
 st.sidebar.text("Status: Operational")
 
-# Title & Description
 st.title("🕵️ AI Fake News Detector")
 st.markdown("""
 This professional AI tool uses advanced **Natural Language Processing (NLP)** and **Logistic Regression** to analyze news articles and determine their credibility.
 """)
 
-# Text Input
 st.subheader("Article Analysis")
 news_input = st.text_area("Paste the news article text below for instant classification:", height=250, placeholder="Enter text here...")
 
@@ -60,15 +80,14 @@ if st.button("Analyze Article", type="primary"):
         try:
             model, vectorizer = load_assets()
             
-            # Get Prediction
+            # Prediction
             label, confidence = predict_single(model, vectorizer, news_input, clean_text)
             
-            # Probabilities for visualization
+            # Visualization logic
             cleaned_text = clean_text(news_input)
             tfidf_text = vectorizer.transform([cleaned_text])
             probs = model.predict_proba(tfidf_text)[0]
             
-            # Layout
             col1, col2 = st.columns([2, 1])
             
             with col1:
@@ -80,7 +99,6 @@ if st.button("Analyze Article", type="primary"):
                 st.metric("Confidence Score", f"{confidence:.4f}")
             
             with col2:
-                # Visualization
                 prob_df = pd.DataFrame({
                     'Category': ['REAL', 'FAKE'],
                     'Probability': probs
@@ -94,12 +112,11 @@ if st.button("Analyze Article", type="primary"):
 
             st.divider()
             
-        except FileNotFoundError:
-            st.error("Model files not found. Please ensure the model has been trained and saved in the 'data/' folder.")
+        except FileNotFoundError as e:
+            st.error(str(e))
         except Exception as e:
             st.error(f"An unexpected error occurred: {e}")
 
-# Footer
 st.markdown("---")
 st.markdown(
     "<div style='text-align: center; color: grey;'>"

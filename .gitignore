@@ -26,10 +26,6 @@ venv/
 .venv/
 ENV/
 
-# AI Artifacts (as requested)
-data/model.pkl
-data/vectorizer.pkl
-
 # IDEs
 .vscode/
 .idea/
