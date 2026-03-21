@@ -1,0 +1,5 @@
+* c2e9393 Fix Streamlit Cloud deployment: robust paths, resource caching, and dependencies
+| * fe8acda Fix Streamlit Cloud deployment: robust paths, resource caching, and dependencies
+|/  
+* 8d1a2f9 Update README.md
+* ebd9b91 Initial commit: Professional repository setup for AI Fake News Detector

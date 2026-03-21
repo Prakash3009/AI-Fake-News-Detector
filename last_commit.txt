@@ -1,0 +1,11 @@
+commit fe8acdaf3d0bd1d63ec4e23d4af65d9d79c076f4
+Author: BHANU PRAKASH G <bhanuprakashreddyg3967@gmail.com>
+Date:   Tue Mar 3 20:05:54 2026 +0530
+
+    Fix Streamlit Cloud deployment: robust paths, resource caching, and dependencies
+
+.gitignore
+app.py
+data/model.pkl
+data/vectorizer.pkl
+requirements.txt

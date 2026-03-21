@@ -1,0 +1,6 @@
+From https://github.com/Prakash3009/AI-Fake-News-Detector
+ * branch            main       -> FETCH_HEAD
+warning: skipped previously applied commit c2e9393
+hint: use --reapply-cherry-picks to include skipped commits
+hint: Disable this message with "git config set advice.skippedCherryPicks false"
+Successfully rebased and updated refs/heads/main.

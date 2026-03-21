@@ -1,0 +1,10 @@
+.gitignore
+README.md
+app.py
+data/model.pkl
+data/news_dataset.csv
+data/vectorizer.pkl
+requirements.txt
+src/main.py
+src/model.py
+src/preprocess.py
